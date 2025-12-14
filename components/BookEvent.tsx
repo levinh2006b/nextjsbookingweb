@@ -2,19 +2,44 @@
 
 import React from 'react'
 import { useState } from 'react';
+import { createBookings } from '@/lib/actions/booking.action';
+import { track } from '@vercel/analytics/react';
 
-const BookEvent = () => {
+
+const BookEvent = ({eventId, slug}:{eventId:string, slug:string}  ) => {
+
+
   const [email, setEmail] = useState('');
   const[submitted ,setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {   //FormEvent la 1 event sinh ra boi Form
-    e.preventDefault()
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    setTimeout(() =>{
-      setSubmitted(true);
-    }, 1000)
-  }
+    const { success } = await createBookings({ eventId, slug, email });
 
+    if (success) {
+        setSubmitted(true);
+        
+        // --- THAY ĐỔI Ở ĐÂY (Thành công) ---
+        // Cũ: posthog.capture('event_booked', { eventId, slug, email })
+        // Mới: Gửi sự kiện 'event_booked' lên Vercel
+        track('event_booked', { 
+            eventId: eventId, 
+            slug: slug, 
+            email: email 
+        });
+
+    } else {
+        // --- THAY ĐỔI Ở ĐÂY (Thất bại) ---
+        console.error('Booking creation failed');
+
+        // Cũ: posthog.captureException('Booking creation failed')
+        // Mới: Vercel không có captureException, ta tự tạo sự kiện lỗi để theo dõi
+        track('booking_failed', { 
+            reason: 'Booking creation failed' 
+        });
+    }
+}
 
   return (
     <div>
@@ -42,5 +67,6 @@ const BookEvent = () => {
     </div>
   )
 }
+
 
 export default BookEvent

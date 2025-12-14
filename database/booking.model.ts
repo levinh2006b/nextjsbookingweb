@@ -1,9 +1,10 @@
 import mongoose, { Schema, model, models, Document, Model } from 'mongoose';
 
-// Interface definition
+// 1. Sửa Interface: Thêm slug vào đây
 export interface IBooking extends Document {
   eventId: mongoose.Types.ObjectId;
   email: string;
+  slug: string; // <--- THÊM DÒNG NÀY
   createdAt: Date;
   updatedAt: Date;
 }
@@ -14,12 +15,16 @@ const BookingSchema = new Schema<IBooking>(
       type: Schema.Types.ObjectId, 
       ref: 'Event', 
       required: true,
-      index: true // Index for faster queries by Event
+      index: true 
+    },  
+    // 2. Sửa Schema: Thêm cấu hình cho slug vào đây
+    slug: {
+      type: String,
+      required: true, // Nếu bắt buộc phải có
     },
     email: {
       type: String,
       required: true,
-      // Basic Regex for email validation
       match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']
     },
   },
@@ -28,30 +33,27 @@ const BookingSchema = new Schema<IBooking>(
 
 // Pre-save hook: Referential Integrity Check
 // FIX: Thêm kiểu dữ liệu cho next: (err?: Error) => void
-BookingSchema.pre('save', async function (next: (err?: Error) => void) {
-  // We use mongoose.models.Event to verify existence without needing a direct file import
-  // which avoids potential circular dependency issues in some architectures.
+// Pre-save hook: Referential Integrity Check
+// SỬA: Bỏ tham số 'next'. Hàm async sẽ tự trả về Promise.
+BookingSchema.pre('save', async function () {
   const eventModel = mongoose.models.Event;
   
+  // Thay next(new Error(...)) bằng throw new Error(...)
   if (!eventModel) {
-    return next(new Error('Event model not initialized.'));
+    throw new Error('Event model not initialized.');
   }
 
-  try {
-    // Ép kiểu this để TypeScript hiểu đây là IBooking
-    const booking = this as unknown as IBooking;
-    
-    const eventExists = await eventModel.exists({ _id: booking.eventId });
+  // Ép kiểu this để TypeScript hiểu (giữ nguyên cách bạn làm)
+  const booking = this as unknown as IBooking;
+  
+  // Logic kiểm tra Event tồn tại
+  const eventExists = await eventModel.exists({ _id: booking.eventId });
 
-    if (!eventExists) {
-      return next(new Error(`Event with ID ${booking.eventId} does not exist.`));
-    }
-
-    next();
-  } catch (error) {
-    // Nếu có lỗi bất ngờ xảy ra trong quá trình await
-    next(error as Error);
+  if (!eventExists) {
+    throw new Error(`Event with ID ${booking.eventId} does not exist.`);
   }
+
+  // Không cần gọi next() ở cuối nữa, hàm chạy xong tự động hiểu là thành công.
 });
 
 // Prevent model overwrite in Next.js development environment

@@ -5,6 +5,9 @@ import { Events } from "@/lib/constants";
 import { cacheLife } from "next/cache";
 
 
+
+export const dynamic = 'force-dynamic';
+
 //Access global variable
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 

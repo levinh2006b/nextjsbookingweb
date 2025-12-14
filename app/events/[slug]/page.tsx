@@ -5,7 +5,11 @@ import BookEvent from "@/components/BookEvent";
 import { getSimlilarEventBySlug } from "@/lib/actions/event.actions";
 import { IEvent } from "@/database/event.model";
 import EventCard from "@/components/EventCard";
+import { cacheLife } from "next/cache";
 
+
+export const dynamic = 'force-dynamic';
+  
 /* Tailwind properties used in this file
    mt-2: Margin top 2 => Cach le tren 2
    text-lg => Text large => Size
@@ -49,6 +53,9 @@ const EventTags = ({tags}:{tags:string[]}) => (
 )
 
 const EventDetailsPage = async ({params}: {params: Promise<{slug: string}>}) => {
+  'use cache'      //Fix bug loi ma Suspense -> Thay vi tim cac component can load va wrap trong Suspense thi use truc tiep trong cache
+  cacheLife('hours')
+
   const {slug} = await params
   const request = await fetch(`${BASE_URL}/api/events/${slug}`);  //fetch: Lay data o dia chi trong ()
   
@@ -121,7 +128,7 @@ const EventDetailsPage = async ({params}: {params: Promise<{slug: string}>}) => 
                  ):(
                   <p className="text-sm">Be the first to book your spot!</p>
                  )}
-                 <BookEvent />
+                 <BookEvent eventId={event._id}  slug={event.slug} />
            </div>
         </aside>
     </div>
