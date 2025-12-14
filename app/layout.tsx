@@ -5,6 +5,7 @@ import { Schibsted_Grotesk, Martian_Mono } from "next/font/google";
 import "./globals.css";
 import LightRays from "@/components/LightRays";
 import Navbar from "@/components/NavBar";
+import { Analytics } from "@vercel/analytics/react";
 
 const schibsted_Grotesk = Schibsted_Grotesk({
   variable: "--font-schibsted_Grotesk",
@@ -54,7 +55,7 @@ export default function RootLayout({
 
         {children}
 </main>
-
+<Analytics />
       </body>
     </html>
   );
