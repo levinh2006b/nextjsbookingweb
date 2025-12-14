@@ -4,7 +4,6 @@ import { IEvent } from "@/database/event.model";
 // Import hàm mới
 import { getAllEvents } from "@/lib/actions/event.actions";
 
-export const dynamic = 'force-dynamic';
 
 const page = async () => {
   // Thay thế đoạn fetch cũ bằng hàm này:

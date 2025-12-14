@@ -6,8 +6,6 @@ import { getSimlilarEventBySlug, getEventBySlug } from "@/lib/actions/event.acti
 import { IEvent } from "@/database/event.model";
 import EventCard from "@/components/EventCard";
 
-// Giữ dòng này để fix lỗi build static
-export const dynamic = 'force-dynamic';
 
 /* ... (Giữ nguyên các component con EventDetailItem, EventAgenda, EventTags của bạn ở đây) ... */
 const EventDetailItem = ({icon,alt,label}: {icon:string; alt:string;  label:string}) =>(
