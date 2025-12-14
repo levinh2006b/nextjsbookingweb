@@ -1,22 +1,14 @@
 import EventCard from "@/components/EventCard";
 import ExploreBtn from "@/components/ExploreBtn";
 import { IEvent } from "@/database/event.model";
-import { Events } from "@/lib/constants";
-import { cacheLife } from "next/cache";
-
-
+// Import hàm mới
+import { getAllEvents } from "@/lib/actions/event.actions";
 
 export const dynamic = 'force-dynamic';
 
-//Access global variable
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-
-
 const page = async () => {
-  'use cache'
-  cacheLife('hours')
-  const response = await fetch(`${BASE_URL}/api/events`)
-  const {events} = await response.json();
+  // Thay thế đoạn fetch cũ bằng hàm này:
+  const events = await getAllEvents();
 
   return (
    <section>
@@ -28,15 +20,14 @@ const page = async () => {
     <div className="mt-20 space-y-7">
         <h3>Featured Events</h3>
         <ul className="events">
-          {events && events.length >0 && events.map((event: IEvent) => (
-            <li key = {event.title}  className="list-none">
-              <EventCard {...event} />   {/* ...event lấy tất cả các thuộc tính của đối tượng event (là title và image) và truyền chúng vào Component <EventCard> dưới dạng Props. */}
+          {events && events.length > 0 && events.map((event: IEvent) => (
+            // Sửa key: dùng _id thay vì title để chuẩn hơn (nếu có trùng tên)
+            <li key={String(event._id)} className="list-none">
+              <EventCard {...event} />
             </li>
-
-))}
+          ))}
         </ul>
     </div>
-
    </section>
   )
 }
